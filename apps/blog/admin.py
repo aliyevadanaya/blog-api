@@ -5,11 +5,13 @@ from .models import Category, Comment, Post, Tag
 
 class CategoryAdmin(admin.ModelAdmin):
     """Category model admin configuration class"""
+    
     list_display = ('name',)
     
 
 class TagAdmin(admin.ModelAdmin):
     """Tag model admin configuration class"""
+    
     list_display = ('name',)
     
 
@@ -21,6 +23,7 @@ class PostAdmin(admin.ModelAdmin):
     
 class CommentAdmin(admin.ModelAdmin):
     """Comment model admin configuration class"""
+    
     list_display = ('post', 'author')
     
     
