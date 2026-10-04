@@ -1,1 +1,1 @@
-![ERD](.docs/djangoerd.png)
+![ERD](docs/djangoerd.png)
