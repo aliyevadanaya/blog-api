@@ -46,6 +46,7 @@ class Post(Model):
     """Posts database table."""
 
     TITLE_MAX_LEN = 200
+    STATUS_MAX_LEN = 9
 
     author = ForeignKey(
         to=CustomUser,
@@ -75,6 +76,7 @@ class Post(Model):
         PUBLISHED = 'published'
 
     status = CharField(
+        max_length=STATUS_MAX_LEN,
         choices=Status.choices,
     )
     created_at = DateTimeField(
