@@ -27,10 +27,8 @@ class Category(Model):
         unique=True,
     )
 
-
     def __str__(self) -> str:
         return self.name
-
 
 class Tag(Model):
     """Tags database table."""
@@ -45,10 +43,8 @@ class Tag(Model):
         unique=True,
     )
 
-
     def __str__(self) -> str:
         return self.name
-
 
 class Post(Model):
     """Posts database table."""
@@ -94,7 +90,6 @@ class Post(Model):
     updated_at = DateTimeField(
         auto_now=True,
     )
-
 
     def __str__(self) -> str:
         return self.title
