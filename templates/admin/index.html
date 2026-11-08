@@ -1,0 +1,138 @@
+
+{% extends "admin/base_site.html" %}
+{% load i18n unfold %}
+
+{% block content %}
+<div class="container mx-auto">
+
+    <h1 class="text-2xl font-semibold mb-6">
+        Dashboard overview
+    </h1>
+
+    <!-- Statistics cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+
+        <div class="border rounded-default p-4">
+            <div class="text-sm text-base-500">Users</div>
+            <div class="text-3xl font-semibold">
+                {{ users_count|default:0 }}
+            </div>
+        </div>
+
+        <div class="border rounded-default p-4">
+            <div class="text-sm text-base-500">Published posts</div>
+            <div class="text-3xl font-semibold">
+                {{ published_count|default:0 }}
+            </div>
+        </div>
+
+        <div class="border rounded-default p-4">
+            <div class="text-sm text-base-500">Drafts</div>
+            <div class="text-3xl font-semibold">
+                {{ drafts_count|default:0 }}
+            </div>
+        </div>
+
+        <div class="border rounded-default p-4">
+            <div class="text-sm text-base-500">Comments</div>
+            <div class="text-3xl font-semibold">
+                {{ comments_count|default:0 }}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Charts and publication status -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+
+        <section class="border rounded-default p-4">
+            <h2 class="text-lg font-semibold mb-4">
+                Posts by category
+            </h2>
+
+            {% component "unfold/components/chart/bar.html" with data=chart_data height=220 %}
+            {% endcomponent %}
+        </section>
+
+        <section class="border rounded-default p-4">
+            <h2 class="text-lg font-semibold mb-4">
+                Publication status
+            </h2>
+
+            <p class="mb-2">
+                Published: {{ published_percentage|floatformat:1 }}%
+            </p>
+
+            <div class="w-full rounded-full bg-base-200 h-3 mb-4">
+                <div
+                    class="bg-green-600 h-3 rounded-full"
+                    style="width: {{ published_percentage }}%">
+                </div>
+            </div>
+
+            <p class="mb-2">
+                Drafts: {{ drafts_percentage|floatformat:1 }}%
+            </p>
+
+            <div class="w-full rounded-full bg-base-200 h-3">
+                <div
+                    class="bg-orange-500 h-3 rounded-full"
+                    style="width: {{ drafts_percentage }}%">
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+
+    <!-- Top 5 authors -->
+    <section class="border rounded-default p-4">
+
+        <h2 class="text-lg font-semibold mb-4">
+            Top 5 authors
+        </h2>
+
+        <div class="overflow-x-auto">
+            <table class="w-full">
+
+                <thead>
+                    <tr class="text-left border-b">
+                        <th class="py-2">Author</th>
+                        <th class="py-2">Email</th>
+                        <th class="py-2">Posts</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for author in top_authors %}
+                    <tr class="border-b">
+                        <td class="py-2">
+                            {{ author.first_name }} {{ author.last_name }}
+                        </td>
+
+                        <td class="py-2">
+                            {{ author.email }}
+                        </td>
+
+                        <td class="py-2">
+                            {{ author.posts_count }}
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="py-3">
+                            No authors yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}
