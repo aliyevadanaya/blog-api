@@ -8,7 +8,7 @@ ALLOWED_HOSTS = ['*']
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': config('BLOG_POSTGRES_NAME', cast=str),
         'USER': config('BLOG_POSTGRES_USER', cast=str),
         'PASSWORD': config('BLOG_POSTGRES_PASSWORD', cast=str),

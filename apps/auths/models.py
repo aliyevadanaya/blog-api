@@ -26,7 +26,7 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("Email is required")
         
         user = self.model(
-            email = self.normalize_email(email),
+            email = self.normalize_email(email).lower(),
             first_name = first_name,
             last_name = last_name,
             **extra_fields
@@ -89,5 +89,5 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ("first_name", "last_name")
     USERNAME_FIELD = "email"
     
-    object = CustomUserManager()
+    objects = CustomUserManager()
     
