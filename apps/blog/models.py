@@ -1,3 +1,4 @@
+from apps.auths.models import CustomUser
 from django.db.models import (
     CASCADE,
     SET_NULL,
@@ -10,8 +11,6 @@ from django.db.models import (
     TextChoices,
     TextField,
 )
-
-from apps.auths.models import CustomUser
 
 
 class Category(Model):
