@@ -1,5 +1,12 @@
 from typing import Any
 
+from django.contrib import admin
+from django.core.exceptions import PermissionDenied
+from django.db.models import Count, Prefetch, QuerySet, TextField
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.template.response import TemplateResponse
+from django.urls import reverse
 from unfold.admin import ModelAdmin, TabularInline
 from unfold.contrib.filters.admin import (
     AutocompleteSelectFilter,
@@ -11,14 +18,6 @@ from unfold.contrib.filters.admin import (
 from unfold.contrib.forms.widgets import WysiwygWidget
 from unfold.decorators import action, display
 from unfold.sections import TableSection
-
-from django.contrib import admin
-from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Prefetch, QuerySet, TextField
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, redirect
-from django.template.response import TemplateResponse
-from django.urls import reverse
 
 from .models import Category, Comment, Post, Tag
 

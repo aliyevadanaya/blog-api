@@ -1,13 +1,12 @@
 import json
 from typing import Any
 
+from apps.blog.models import Category, Comment, Post
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models.aggregates import Count
 from django.http import HttpRequest
 from django.urls import reverse_lazy
-
-from apps.blog.models import Category, Comment, Post
 
 User = get_user_model()
 TOP_AUTHORS_LIMIT = 5

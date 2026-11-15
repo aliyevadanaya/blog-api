@@ -1,16 +1,16 @@
 import random
 import time
+from datetime import timedelta
 from typing import Any
-
-from faker import Faker
-
-from django.contrib.auth.hashers import make_password
-from django.core.management.base import BaseCommand, CommandError, CommandParser
-from django.db import transaction
-from django.utils.text import slugify
 
 from apps.auths.models import CustomUser
 from apps.blog.models import Category, Comment, Post, Tag
+from django.contrib.auth.hashers import make_password
+from django.core.management.base import BaseCommand, CommandError, CommandParser
+from django.db import transaction
+from django.utils import timezone
+from django.utils.text import slugify
+from faker import Faker
 
 DEFAULT_USERS = 20
 DEFAULT_POSTS = 100
@@ -29,6 +29,10 @@ INACTIVE_USER_RATE = 0.1
 STAFF_USER_RATE = 0.05
 PUBLISHED_POST_RATE = 0.7
 NO_CATEGORY_RATE = 0.1
+POST_DATE_RANGE_DAYS = 365
+EDITED_POST_RATE = 0.3
+MIN_UPDATE_DAYS = 1
+MAX_UPDATE_DAYS = 30
 
 CATEGORIES = [
     "Python",
@@ -69,6 +73,8 @@ class Command(BaseCommand):
     help = "Fill the database with fake data."
 
     def add_arguments(self, parser: CommandParser) -> None:
+        """Define command-line argiments for the seed command."""
+        
         parser.add_argument(
             "--users",
             type=int,
@@ -95,6 +101,8 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args: Any, **options: Any) -> None:
+        """Generate and save sample blog data."""
+        
         started_at = time.perf_counter()
 
         users_count = options["users"]
@@ -232,9 +240,38 @@ class Command(BaseCommand):
         if new_posts:
             Post.objects.bulk_create(new_posts)
 
-        created_posts = list(
-            Post.objects.filter(slug__in=[post.slug for post in new_posts])
-        )
+            now = timezone.now()
+        
+            for post in new_posts:
+                    
+                is_edited = random.random() < EDITED_POST_RATE
+
+                if is_edited:
+                    days_ago = random.randint(
+                        MIN_UPDATE_DAYS,
+                        POST_DATE_RANGE_DAYS,
+                    )
+                else:
+                    days_ago = random.randint(
+                        0,
+                        POST_DATE_RANGE_DAYS,
+                    )
+
+                post.created_at = now - timedelta(days=days_ago)
+
+                if is_edited:
+                    update_days = random.randint(
+                        MIN_UPDATE_DAYS,
+                        min(MAX_UPDATE_DAYS, days_ago),
+                    )
+
+                    post.updated_at = post.created_at + timedelta(days=update_days)
+                else:
+                    post.updated_at = post.created_at
+                
+            Post.objects.bulk_update(new_posts, ["created_at", "updated_at"])
+            
+        created_posts = new_posts
 
         for post in created_posts:
             selected_tags = random.sample(
@@ -243,28 +280,48 @@ class Command(BaseCommand):
             )
             post.tags.set(selected_tags)
 
-        published_posts = list(Post.objects.filter(status=Post.Status.PUBLISHED))
+        published_posts = [
+            post
+            for post in created_posts
+            if post.status == Post.Status.PUBLISHED
+        ]
+        
+        if not published_posts:
+            published_posts = list(Post.objects.filter(status=Post.Status.PUBLISHED))
 
         if comments_count > 0 and not published_posts:
             raise CommandError("Can't create comments: there are no published posts.")
 
         new_comments = []
-
+        now = timezone.now()
+        
         for _ in range(comments_count):
             sentences = fake.sentences(
-                nb=random.randint(MIN_COMMENT_SENTENCES, MAX_COMMENT_SENTENCES)
-            )
-
-            new_comments.append(
-                Comment(
-                    post=random.choice(published_posts),
-                    author=random.choice(users),
-                    body=" ".join(sentences),
+                nb=random.randint(
+                    MIN_COMMENT_SENTENCES,
+                    MAX_COMMENT_SENTENCES,
                 )
             )
-
+            
+            post = random.choice(published_posts)
+            
+            time_difference = int((now-post.created_at).total_seconds())
+            
+            comment_created_at = post.created_at + timedelta(seconds=random.randint(0, max(0, time_difference)))
+            
+            new_comments.append(
+                Comment(
+                    post=post,
+                    author=random.choice(users),
+                    body=" ".join(sentences),
+                    created_at=comment_created_at,
+                )
+            )
+            
         if new_comments:
             Comment.objects.bulk_create(new_comments)
+            
+            Comment.objects.bulk_update(new_comments, ["created_at"])
 
         elapsed_time = time.perf_counter() - started_at
 
